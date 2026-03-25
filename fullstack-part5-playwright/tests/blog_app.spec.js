@@ -1,6 +1,6 @@
 const { test, describe, expect, beforeEach } = require("@playwright/test");
 
-describe("Blog app", () => {
+describe("Blog app", async () => {
   beforeEach(async ({ page, request }) => {
     // empty the db here
     await request.post("http://localhost:3003/api/testing/reset");
@@ -42,5 +42,25 @@ describe("Blog app", () => {
         page.getByText("invalid username or password"),
       ).toBeVisible();
     });
+  });
+
+  test("a new blog can be created", async ({ page }) => {
+    await page.getByRole("textbox").first().fill("mluukkai");
+    await page.getByRole("textbox").last().fill("salainen");
+    await page.getByRole("button", { name: "login" }).click();
+
+    await page.getByRole("button", { name: "new blog post" }).click();
+
+    await page.getByRole("textbox", { name: "title" }).fill("Test Blog Post");
+    await page.getByRole("textbox", { name: "author" }).fill("John Doe");
+    await page
+      .getByRole("textbox", { name: "url" })
+      .fill("https://example.com");
+
+    await page.getByRole("button", { name: "save" }).click();
+
+    await page.waitForTimeout(3500);
+
+    await expect(page.getByText("John Doe: Test Blog Post")).toBeVisible();
   });
 });
