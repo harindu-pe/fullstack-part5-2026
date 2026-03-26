@@ -75,10 +75,10 @@ const App = () => {
       });
       setTimeout(() => {
         setNotification(null);
-      }, 2000);
+      }, 1000);
       setTimeout(() => {
         window.location.reload();
-      }, 3000);
+      }, 2000);
     } catch (error) {
       // update error message
       setNotification({

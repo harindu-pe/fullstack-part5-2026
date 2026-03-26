@@ -95,7 +95,7 @@ describe("Blog app", async () => {
     await expect(page.getByText("John Doe: Test Blog Post")).not.toBeVisible();
   });
 
-  test.only("only blog creator can see delete button", async ({ page }) => {
+  test("only blog creator can see delete button", async ({ page }) => {
     await loginWith(page, "mluukkai", "salainen");
     await createBlog(page, "Test Blog Post", "John Doe", "https://example.com");
 
@@ -114,5 +114,39 @@ describe("Blog app", async () => {
     await expect(
       page.getByRole("button", { name: "remove" }),
     ).not.toBeVisible();
+  });
+
+  test("blogs are arranged according to the likes", async ({ page }) => {
+    await loginWith(page, "mluukkai", "salainen");
+    await createBlog(page, "Test Blog Post", "John Doe", "https://example.com");
+
+    await page.waitForTimeout(3500);
+
+    await expect(page.getByText("John Doe: Test Blog Post")).toBeVisible();
+
+    await page.getByRole("button", { name: "view" }).click();
+    await page.getByRole("button", { name: "like" }).click();
+    await page.waitForTimeout(2500);
+
+    await page.getByRole("button", { name: "view" }).click();
+    await page.getByRole("button", { name: "like" }).click();
+    await page.waitForTimeout(2500);
+
+    await createBlog(
+      page,
+      "Test Blog Post 2",
+      "Jane Doe",
+      "https://example.com",
+    );
+
+    await page.waitForTimeout(3500);
+
+    const viewButtons = await page.getByRole("button", { name: "view" }).all();
+
+    await viewButtons[1].click();
+    await page.getByRole("button", { name: "like" }).click();
+
+    const blogs = await page.locator(".blogPost").all();
+    await expect(blogs[0]).toContainText("John Doe: Test Blog Post");
   });
 });
