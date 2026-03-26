@@ -50,7 +50,7 @@ describe("Blog app", async () => {
     await expect(page.getByText("John Doe: Test Blog Post")).toBeVisible();
   });
 
-  test.only("a new blog can be liked", async ({ page }) => {
+  test("a new blog can be liked", async ({ page }) => {
     await loginWith(page, "mluukkai", "salainen");
     await createBlog(page, "Test Blog Post", "John Doe", "https://example.com");
 
@@ -65,5 +65,25 @@ describe("Blog app", async () => {
     await page.getByRole("button", { name: "view" }).click();
 
     await expect(page.getByText("likes 1like")).toBeVisible();
+  });
+
+  test.only("a new blog can be deleted", async ({ page }) => {
+    await loginWith(page, "mluukkai", "salainen");
+    await createBlog(page, "Test Blog Post", "John Doe", "https://example.com");
+
+    await page.waitForTimeout(3500);
+
+    await expect(page.getByText("John Doe: Test Blog Post")).toBeVisible();
+
+    await page.getByRole("button", { name: "view" }).click();
+
+    page.on("dialog", async (dialog) => {
+      expect(dialog.type()).toBe("confirm");
+      await dialog.accept();
+    });
+
+    await page.getByRole("button", { name: "remove" }).click();
+
+    await expect(page.getByText("John Doe: Test Blog Post")).not.toBeVisible();
   });
 });
